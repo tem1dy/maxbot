@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.local
+.tmp_*
+data/
+/tmp/
+/output/
+/backend/__pycache__/
+/backend/*.sqlite3
+/backend/uploads/
+*.py[cod]

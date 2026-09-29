@@ -1,0 +1,50 @@
+{
+  "format_version": "1.0",
+  "data_type": "синтетические демонстрационные данные",
+  "accounts": {
+    "farmer": {
+      "user_id": "preview-farmer",
+      "role": "farmer",
+      "password": null,
+      "availability": "только локальная разработка"
+    },
+    "operator": {
+      "user_id": "preview-operator",
+      "role": "operator",
+      "password": null,
+      "availability": "только локальная разработка"
+    }
+  },
+  "field_request": {
+    "name": "Демо поле 1",
+    "crop": "Пшеница",
+    "region": "Демонстрационные данные",
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [51.53, 46.03],
+          [51.54, 46.03],
+          [51.54, 46.05],
+          [51.53, 46.05]
+        ]
+      ]
+    }
+  },
+  "order_request": {
+    "field_id": "Подставьте id из ответа POST /api/fields",
+    "task": "Облёт поля",
+    "description": "Демонстрационная проверка"
+  },
+  "offer_request": {
+    "price": 1500,
+    "scheduled_date": "Укажите будущие дату и время в формате ISO 8601",
+    "comment": "Демонстрационное предложение"
+  },
+  "result": {
+    "description": "Демонстрационный результат облёта",
+    "file_name": "demo-photo.jpg",
+    "content_type": "image/jpeg",
+    "max_size_bytes": 26214400
+  }
+}

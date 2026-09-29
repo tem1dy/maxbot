@@ -1,0 +1,101 @@
+schema_version: "1.0"
+solution:
+  name: "Поле рядом"
+  package_version: "0.5.3"
+  product_release: "16"
+api:
+  openapi_version: "3.1.0"
+  specification_file: "openapi.json"
+  production_base_url: "https://vicosta-bot.ru/api"
+  local_base_url: "http://localhost:8080/api"
+  authentication:
+    method: "HTTP-only cookie agromax_session"
+    production_identity: "Подписанные данные initData из мини-приложения MAX"
+    development_identity: "POST /auth с демонстрационным идентификатором, только локальная разработка"
+test_accounts:
+  farmer:
+    user_id: "preview-farmer"
+    role: "farmer"
+    password: null
+    environment: "Только NODE_ENV=development"
+  operator:
+    user_id: "preview-operator"
+    role: "operator"
+    password: null
+    environment: "Только NODE_ENV=development"
+  administrator:
+    role: "administrator"
+    credential_source: "Закрытая переменная ADMIN_PASSWORD в локальном .env"
+    password_committed: false
+test_data_file: "test-data.json"
+required_checks:
+  - name: "Состояние API и базы данных"
+    method: GET
+    path: "/health"
+    role: "public"
+    success_status: 200
+    response_content_type: "application/json"
+    expected_fields: ["status", "service", "database"]
+  - name: "Создать локальную демонстрационную сессию"
+    method: POST
+    path: "/auth"
+    role: "farmer or operator"
+    success_status: 200
+    request_content_type: "application/json"
+    response_content_type: "application/json"
+    expected_cookie: "agromax_session"
+    local_only: true
+  - name: "Создать поле"
+    method: POST
+    path: "/fields"
+    role: "farmer"
+    success_status: 201
+    request_content_type: "application/json"
+    expected_fields: ["id", "field_number", "area", "geometry"]
+  - name: "Создать заказ по полю"
+    method: POST
+    path: "/orders"
+    role: "farmer"
+    success_status: 201
+    request_content_type: "application/json"
+    expected_state: "pending"
+  - name: "Отправить предложение оператора"
+    method: POST
+    path: "/orders/{order_id}/offers"
+    role: "operator"
+    success_status: 201
+    request_content_type: "application/json"
+    expected_fields: ["id", "price", "scheduled_date", "status"]
+  - name: "Принять предложение оператора"
+    method: POST
+    path: "/orders/{order_id}/offers/{offer_id}/accept"
+    role: "farmer"
+    success_status: 200
+    expected_state: "in_progress"
+  - name: "Загрузить файл результата"
+    method: POST
+    path: "/orders/{order_id}/files"
+    role: "assigned operator"
+    success_status: 201
+    request_content_type: "multipart/form-data"
+    max_file_size_bytes: 26214400
+  - name: "Завершить заказ"
+    method: PUT
+    path: "/orders/{order_id}/complete"
+    role: "assigned operator"
+    success_status: 200
+    request_content_type: "application/json"
+    expected_state: "completed"
+  - name: "Прочитать сформированный отчёт"
+    method: GET
+    path: "/orders/{order_id}/report.pdf"
+    role: "farmer"
+    success_status: 200
+    response_content_type: "application/pdf"
+error_statuses:
+  - 401
+  - 403
+  - 404
+  - 409
+  - 413
+  - 422

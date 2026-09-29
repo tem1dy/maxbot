@@ -1,0 +1,59 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      MAX_BOT_TOKEN: ${MAX_BOT_TOKEN:-}
+      APP_SECRET: "${APP_SECRET:?Set APP_SECRET in .env}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}"
+      MAX_INIT_DATA_MAX_AGE: ${MAX_INIT_DATA_MAX_AGE:-3600}
+      SESSION_MAX_AGE: ${SESSION_MAX_AGE:-2592000}
+      ADMIN_SESSION_MAX_AGE: ${ADMIN_SESSION_MAX_AGE:-3600}
+      MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-26214400}
+      FILE_DOWNLOAD_TOKEN_TTL: ${FILE_DOWNLOAD_TOKEN_TTL:-900}
+      DATABASE_PATH: /data/agromax.sqlite3
+      FILE_STORAGE_PATH: /data/uploads
+    volumes:
+      - agromax_data:/data
+    expose:
+      - "8090"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/api/health').read()"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_BASE_URL: /api
+        VITE_YANDEX_MAPS_API_KEY: ${VITE_YANDEX_MAPS_API_KEY:-}
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  bot:
+    profiles: ["max"]
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    environment:
+      MAX_BOT_TOKEN: ${MAX_BOT_TOKEN:-}
+      MAX_APP_URL: ${MAX_APP_URL:-https://vicosta-bot.ru}
+      MAX_BOT_ID: ${MAX_BOT_ID:-}
+      MAX_BOT_USERNAME: ${MAX_BOT_USERNAME:-}
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  agromax_data:

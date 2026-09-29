@@ -1,0 +1,16 @@
+[Unit]
+Description=Поле рядом FastAPI
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/agromaxapp/backend
+EnvironmentFile=-/opt/agromaxapp/.env
+Environment=DATABASE_PATH=/opt/agromaxapp/backend/agromax.sqlite3
+Environment=FILE_STORAGE_PATH=/opt/agromaxapp/backend/uploads
+ExecStart=/opt/agromaxapp/backend/.venv/bin/uvicorn main:app --host 127.0.0.1 --port 8090
+Restart=always
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target
